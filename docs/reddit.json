@@ -1,0 +1,9 @@
+{
+    "name": "Reddit",
+    "args": {
+        "subreddit": ["mildlyinteresting"],
+        "sort": ["top", "new"]
+    },
+    "request": "['http://reddit.com/r/', subreddit, '.json'] | join('', @) | {method: 'GET', url: @}",
+    "parse": "data.children[].data[].{title: title, author: author, image: url}"
+}
