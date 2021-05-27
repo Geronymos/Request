@@ -6,19 +6,31 @@ import { filePicker } from '../data/apiStore';
 import './Page.css';
 
 // import jmespath from "jmespath";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 const jmespath = require("jmespath");
 
 const Page: React.FC = () => {
 
   const { name } = useParams<{ name: string; }>();
+  const [store, setStore] = useState(JSON.parse(localStorage.api || "[]"));
 
   const [output, setOutput] = useState([]);
 
   async function loadAPI() {
     const files: string[] = await filePicker();
-    const api = JSON.parse(files[0]);
-    console.log("api", api, api.request, api.parse);
+    const newAPI = JSON.parse(files[0]);
+    if (!store.some((api:any) => api.name == newAPI.name)) setStore([...store, newAPI])
+    else alert(`API namend ${newAPI.name} was already saved!`);
+  }
+
+  useEffect(() => {
+    localStorage.api = JSON.stringify(store);
+    store[0] && getAPI(store[0]);
+  }, [store]);
+
+  async function getAPI(api: any) {
+
+    // console.log("api", api, api.request, api.parse);
     const args = {
       subreddit: "mildlyinteresting",
       sort: "top"
@@ -26,14 +38,10 @@ const Page: React.FC = () => {
 
     const proxy = "https://cors-anywhere.herokuapp.com/";
 
-    // const request = jmespath.search(args, "['http://reddit.com/r/', subreddit, '.json'] | join('', @) | {method: 'GET', url: @}");
 
     const request = jmespath.search(args, api.request );
-    console.log(request);
     const response = await fetch(proxy + request.url);
     const json = await response.json();
-    console.log(json);
-    // const data = jmespath.search(json, "data.children[].data[].{title: title, author: author, image: url}");
     const data = jmespath.search(json, api.parse);
 
     setOutput(data);

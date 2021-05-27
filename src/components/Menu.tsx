@@ -21,6 +21,15 @@ interface AppPage {
   title: string;
 }
 
+interface API {
+  name: string,
+  args: {
+    [key: string]: string[]
+  },
+  request: string,
+  parser: string
+}
+
 const appPages: AppPage[] = [
   {
     title: 'Inbox',
@@ -39,12 +48,12 @@ const Menu: React.FC = () => {
         <IonList id="inbox-list">
           <IonListHeader>Inbox</IonListHeader>
           <IonNote>hi@ionicframework.com</IonNote>
-          {appPages.map((appPage, index) => {
+          {[].map((appPage: API, index: number) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
-                <IonItem className={location.pathname === appPage.url ? 'selected' : ''} routerLink={appPage.url} routerDirection="none" lines="none" detail={false}>
-                  <IonIcon slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} />
-                  <IonLabel>{appPage.title}</IonLabel>
+                <IonItem className={location.pathname === appPage.name ? 'selected' : ''} routerLink={appPage.name} routerDirection="none" lines="none" detail={false}>
+                  {/* <IonIcon slot="start" ios={appPage.iosIcon} md={appPage.mdIcon} /> */}
+                  <IonLabel>{appPage.name}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             );
