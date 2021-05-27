@@ -3,6 +3,7 @@ import { helpCircle } from 'ionicons/icons';
 import { useParams } from 'react-router';
 import Request from '../components/Request';
 import { filePicker } from '../data/apiStore';
+import {APIDescription, APIOutput, APIRequest} from '../types/types';
 import './Page.css';
 
 // import jmespath from "jmespath";
@@ -12,23 +13,24 @@ const jmespath = require("jmespath");
 const Page: React.FC = () => {
 
   const { name } = useParams<{ name: string; }>();
-  const [store, setStore] = useState(JSON.parse(localStorage.api || "[]"));
+  const [store, setStore] = useState<APIDescription[]>(JSON.parse(localStorage.api || "[]"));
 
-  const [output, setOutput] = useState([]);
+  const [output, setOutput] = useState<APIOutput[]>([]);
 
   async function loadAPI() {
     const files: string[] = await filePicker();
-    const newAPI = JSON.parse(files[0]);
-    if (!store.some((api:any) => api.name == newAPI.name)) setStore([...store, newAPI])
-    else alert(`API namend ${newAPI.name} was already saved!`);
+    const newAPI:APIDescription = JSON.parse(files[0]);
+    if (!store.some((api:APIDescription) => api.name == newAPI.name)) setStore([...store, newAPI])
+    else alert(`API named ${newAPI.name} was already saved!`);
   }
 
   useEffect(() => {
     localStorage.api = JSON.stringify(store);
+    console.log(store);
     store[0] && getAPI(store[0]);
   }, [store]);
 
-  async function getAPI(api: any) {
+  async function getAPI(api: APIDescription) {
 
     // console.log("api", api, api.request, api.parse);
     const args = {
@@ -39,10 +41,10 @@ const Page: React.FC = () => {
     const proxy = "https://cors-anywhere.herokuapp.com/";
 
 
-    const request = jmespath.search(args, api.request );
+    const request:APIRequest = jmespath.search(args, api.request );
     const response = await fetch(proxy + request.url);
     const json = await response.json();
-    const data = jmespath.search(json, api.parse);
+    const data:APIOutput[] = jmespath.search(json, api.parse);
 
     setOutput(data);
     return data;
